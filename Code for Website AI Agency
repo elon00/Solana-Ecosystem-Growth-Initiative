@@ -1,0 +1,11 @@
+use rocket::{get, Rocket};
+
+#[get("/")]
+fn index() -> &'static str {
+    "<html><body><h1>Welcome to Solana AI Agency!</h1></body></html>"
+}
+
+fn main() {
+    let rocket = Rocket::build().mount("/", routes![index]);
+    rocket.launch().unwrap();
+}
