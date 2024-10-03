@@ -1,0 +1,76 @@
+use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    entrypoint,
+    entrypoint::ProgramResult,
+    msg,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+};
+
+// Define the token's metadata
+const TOKEN_NAME: &str = "Solana AI Coin";
+const TOKEN_SYMBOL: &str = "SAIC";
+const DECIMALS: u8 = 9;
+
+// Define the token's accounts
+struct TokenAccounts {
+    mint: Pubkey,
+    alice: Pubkey,
+    bob: Pubkey,
+}
+
+// Initialize the token's accounts
+fn init_token_accounts(accounts: &[AccountInfo]) -> Result<TokenAccounts, ProgramError> {
+    let mint_account_info = next_account_info(accounts)?;
+    let alice_account_info = next_account_info(accounts)?;
+    let bob_account_info = next_account_info(accounts)?;
+
+    Ok(TokenAccounts {
+        mint: *mint_account_info.key,
+        alice: *alice_account_info.key,
+        bob: *bob_account_info.key,
+    })
+}
+
+// Create a new token mint
+fn create_mint(accounts: &[AccountInfo], token_accounts: &TokenAccounts) -> Result<(), ProgramError> {
+    let mint_account_info = next_account_info(accounts)?;
+    let rent_sysvar_account_info = next_account_info(accounts)?;
+    let token_program_account_info = next_account_info(accounts)?;
+
+    // Create a new token mint
+    **mint_account_info.try_borrow_mut_lamports()? += 1;
+    msg!("Create mint account");
+    Ok(())
+}
+
+// Mint tokens to Alice's account
+fn mint_to_alice(accounts: &[AccountInfo], token_accounts: &TokenAccounts) -> Result<(), ProgramError> {
+    let alice_account_info = next_account_info(accounts)?;
+    let mint_account_info = next_account_info(accounts)?;
+    let token_program_account_info = next_account_info(accounts)?;
+
+    // Mint 100 tokens to Alice's account
+    **alice_account_info.try_borrow_mut_lamports()? += 100 * 10_u64.pow(DECIMALS as u32);
+    msg!("Mint 100 tokens to Alice");
+    Ok(())
+}
+
+entrypoint!(process_instruction);
+
+fn process_instruction(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    instruction_data: &[u8],
+) -> ProgramResult {
+    if instruction_data.len() != 1 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let token_accounts = init_token_accounts(accounts)?;
+    match instruction_data[0] {
+        0 => create_mint(accounts, &token_accounts),
+        1 => mint_to_alice(accounts, &token_accounts),
+        _ => Err(ProgramError::InvalidInstruction),
+    }
+}
