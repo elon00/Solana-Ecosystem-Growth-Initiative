@@ -1,0 +1,15 @@
+from rasa_sdk import Action, Tracker
+from rasa_sdk.executor import ActionExecutor
+from rasa_sdk.types import DomainDict
+
+class SolanaAIAgent(Action):
+    def name(self) -> Text:
+        return "solana_ai_agent"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        user_input = tracker.latest_message.text
+        response = "Hello! I'm Solana AI Agent. How can I help you?"
+        dispatcher.utter_message(text=response)
+        return []
+
+action
